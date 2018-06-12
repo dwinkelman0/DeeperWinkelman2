@@ -8,14 +8,15 @@
   <Description/>
   <Dependencies/>
   <VirtualDirectory Name="src">
-    <File Name="node.cpp"/>
-    <File Name="sequence.cpp"/>
+    <File Name="node.cpp" ExcludeProjConfig="Release;"/>
+    <File Name="sequence.cpp" ExcludeProjConfig="Release;"/>
     <File Name="seed.cpp"/>
-    <File Name="tablebase.cpp" ExcludeProjConfig=""/>
+    <File Name="tablebase.cpp" ExcludeProjConfig="Release;"/>
   </VirtualDirectory>
   <VirtualDirectory Name="include">
+    <File Name="tablebase2.h"/>
     <File Name="seed.h"/>
-    <File Name="tablebase.h" ExcludeProjConfig=""/>
+    <File Name="tablebase.h" ExcludeProjConfig="Release;"/>
   </VirtualDirectory>
   <Settings Type="Dynamic Library">
     <GlobalSettings>

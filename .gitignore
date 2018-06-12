@@ -1,0 +1,17 @@
+.build-debug/
+.build-release/
+.build-release_python_2/
+.codelite/
+Archive/
+DeeperWinkelman2_06-08-2018.tar.gz
+Makefile
+
+*.swp
+*.pyc
+*.so
+*.mk
+*.txt
+*/obj/
+*/*_tests
+*/callgrind*
+*/KR-k*
