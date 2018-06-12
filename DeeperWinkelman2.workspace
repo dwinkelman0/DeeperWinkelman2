@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CodeLite_Workspace Name="DeeperWinkelman2" Database="" Version="10.0.0">
+  <Project Name="ardalan" Path="ardalan/ardalan.project" Active="No"/>
+  <Project Name="ardalan_tests" Path="ardalan_tests/ardalan_tests.project" Active="No"/>
+  <Project Name="ardalan_python2" Path="ardalan_python/ardalan_python.project" Active="No"/>
+  <Project Name="ardalan_python" Path="ardalan_python/ardalan_python.project" Active="No"/>
+  <Project Name="erzurum" Path="erzurum/erzurum.project" Active="Yes"/>
+  <Project Name="dwbst" Path="bst/bst.project" Active="No"/>
+  <Project Name="erzurum_tests" Path="erzurum_tests/erzurum_tests.project" Active="No"/>
+  <BuildMatrix>
+    <WorkspaceConfiguration Name="Release Python 3" Selected="no">
+      <Environment/>
+      <Project Name="ardalan" ConfigName="Release"/>
+      <Project Name="ardalan_python" ConfigName="Python3"/>
+      <Project Name="ardalan_tests" ConfigName="Release"/>
+      <Project Name="erzurum" ConfigName="Debug"/>
+      <Project Name="dwbst" ConfigName="Debug"/>
+      <Project Name="erzurum_tests" ConfigName="Debug"/>
+    </WorkspaceConfiguration>
+    <WorkspaceConfiguration Name="Release Python 2" Selected="yes">
+      <Environment/>
+      <Project Name="ardalan" ConfigName="Release"/>
+      <Project Name="ardalan_python" ConfigName="Python2"/>
+      <Project Name="ardalan_tests" ConfigName="Release"/>
+      <Project Name="dwbst" ConfigName="Release"/>
+      <Project Name="erzurum" ConfigName="Release"/>
+      <Project Name="erzurum_tests" ConfigName="Release"/>
+    </WorkspaceConfiguration>
+  </BuildMatrix>
+</CodeLite_Workspace>
