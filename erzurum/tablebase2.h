@@ -63,8 +63,13 @@ protected:
 		static Node * NewLinked(const BoardState state, Node * next, Move move_to_next);
 		static Node * NewFromLine(const std::string line);
 		
+	protected:
+		Node(const Node & other);
+		Node & operator =(const Node & other);
+		
 	/***************************************************************************
 	 * Special Comparisons
+	 * (for insertion into sets instead of as map iterators)
 	 */
 	static inline bool operator == (const Node & left, const Node & right) {
 		return left.state == right.state;
@@ -140,9 +145,9 @@ protected:
 	bool OptimizeNode();
 	
 	Node * AddStaticallySolved(const BoardState state, uint8_t result);
-	Node * AddLinkedSolved(const BoardState state, Node * next, Move move_to_next);
-	Node * AddFrontier(const BoardState state);
-	void AddUnmovesToFrontier(Node * node);
+	Node * AddLinkedSolved(Node * position, Node * next, Move move_to_next);
+	Node * AddToFrontier(const BoardState state);
+	void AddUnmovesToFrontier(const BoardState state);
 	
 /*******************************************************************************
  * File Input/Output
