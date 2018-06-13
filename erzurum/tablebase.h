@@ -5,6 +5,7 @@
 
 #include <queue>
 #include <set>
+#include <string>
 #include <vector>
 
 class TableBase {
@@ -57,10 +58,9 @@ protected:
 	 */
 	public:
 		Node();
-		~Node();
 		
 		static Node * NewStatic(const BoardState state, uint8_t result);
-		static Node * NewLinked(const BoardState state, Node * next, Move move_to_next);
+		static Node * NewFrontier(const BoardState state);
 		static Node * NewFromLine(const std::string line);
 		
 	protected:
@@ -83,7 +83,7 @@ protected:
 	 */
 	public:
 		std::string ToLine() const;
-		friend std::ostream & operator << (std::ostream & os, const Node & node);
+		friend std::ostream & operator << (std::ostream & os, const Node * node);
 		
 	/***************************************************************************
 	 * Miscellaneous
