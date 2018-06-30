@@ -12,7 +12,7 @@
   </VirtualDirectory>
   <Settings Type="Executable">
     <GlobalSettings>
-      <Compiler Options="-std=c++11;-g" C_Options="" Assembler="">
+      <Compiler Options="-std=c++11;-g -Wno-packed-bitfield-compat" C_Options="" Assembler="">
         <IncludePath Value="."/>
         <IncludePath Value="../erzurum"/>
         <IncludePath Value="../ardalan"/>

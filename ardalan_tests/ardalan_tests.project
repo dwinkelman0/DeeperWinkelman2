@@ -18,7 +18,7 @@
   <Dependencies Name="Release"/>
   <Settings Type="Executable">
     <GlobalSettings>
-      <Compiler Options="-std=c++11 -Wall" C_Options="" Assembler="">
+      <Compiler Options="-std=c++11 -Wall -Wno-packed-bitfield-compat" C_Options="" Assembler="">
         <IncludePath Value="../ardalan"/>
       </Compiler>
       <Linker Options="">

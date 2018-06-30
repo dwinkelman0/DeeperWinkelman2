@@ -25,7 +25,7 @@
   <Dependencies Name="Release"/>
   <Settings Type="Dynamic Library">
     <GlobalSettings>
-      <Compiler Options="-std=c++11 -fPIC -O2 -Wall -Wno-write-strings -Wno-strict-aliasing" C_Options="" Assembler="">
+      <Compiler Options="-std=c++11 -fPIC -O2 -Wall -Wno-write-strings -Wno-strict-aliasing -Wno-packed-bitfield-compat" C_Options="" Assembler="">
         <IncludePath Value="../ardalan"/>
       </Compiler>
       <Linker Options=""/>

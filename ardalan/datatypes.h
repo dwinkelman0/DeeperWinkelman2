@@ -67,9 +67,7 @@ public:
  */
 struct Move {
 public:
-	uint8_t start : 6;
-	uint8_t end : 6;
-	uint8_t code : 4;
+	uint8_t start : 6, end : 6, code : 4;
 	
 	Move();
 	Move(uint8_t start, uint8_t end, uint8_t code);
@@ -84,7 +82,7 @@ public:
 	static const uint8_t BLACK_OO = 8;
 	static const uint8_t BLACK_OOO = 9;
 	static const uint8_t NULL_MOVE = 15;
-};
+} __attribute__((__packed__));
 
 /**
  * @class MoveList

@@ -21,7 +21,7 @@
   <Dependencies Name="Release"/>
   <Settings Type="Dynamic Library">
     <GlobalSettings>
-      <Compiler Options="-Wall -std=c++11 -fPIC -g" C_Options="" Assembler="">
+      <Compiler Options="-Wall -std=c++11 -fPIC -g -Wno-packed-bitfield-compat" C_Options="" Assembler="">
         <IncludePath Value="."/>
       </Compiler>
       <Linker Options="">

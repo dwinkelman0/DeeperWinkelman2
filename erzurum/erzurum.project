@@ -8,8 +8,6 @@
   <Description/>
   <Dependencies/>
   <VirtualDirectory Name="src">
-    <File Name="tablebase.cpp"/>
-    <File Name="node.cpp"/>
     <File Name="seed.cpp"/>
   </VirtualDirectory>
   <VirtualDirectory Name="include">
@@ -17,7 +15,7 @@
   </VirtualDirectory>
   <Settings Type="Dynamic Library">
     <GlobalSettings>
-      <Compiler Options="-Wall -std=c++11 -fPIC -g" C_Options="" Assembler="">
+      <Compiler Options="-Wall -std=c++11 -fPIC -g -Wno-packed-bitfield-compat" C_Options="" Assembler="">
         <IncludePath Value="."/>
         <IncludePath Value="../ardalan"/>
       </Compiler>

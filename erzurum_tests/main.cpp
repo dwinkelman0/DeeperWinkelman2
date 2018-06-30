@@ -1,8 +1,11 @@
-#include <seed.h>
+//#include <seed.h>
+
+#include <tablebase.h>
 
 #include <iostream>
 #include <string.h>
 
+/*
 void Test_SequenceFromFile() {
 	BoardState state;
 	state.InitFromFEN("8/8/8/8/8/2k5/1R6/K7 w - - 0 1");
@@ -27,8 +30,10 @@ void Test_Optimization() {
 	KRk.Optimize();
 	std::cout << KRk;
 }
+*/
 
 int main(int argc, char ** argv) {
-	Test_KRkGeneration();
+	//TableBase tb;
+	
 	return 0;
 }
