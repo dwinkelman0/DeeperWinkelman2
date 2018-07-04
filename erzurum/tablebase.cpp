@@ -1,5 +1,20 @@
 #include "tablebase.h"
 
+TableBase::TableBase() {
+	
+}
+
+TableBase::~TableBase() {
+	PosIterator pos_i = positions.begin();
+	PosIterator pos_end = positions.end();
+	for (; pos_i != pos_end; pos_i++) {
+		Node * node = pos_i->second;
+		if (node) {
+			delete node;
+		}
+	}
+}
+
 bool TableBase::AddStaticallySolved(BoardState state, uint8_t result) {
 	
 	// Check that node does not already exist
@@ -41,7 +56,7 @@ bool TableBase::AddFrontier(BoardState state) {
 	
 	// Insert new node (in new memory) into table
 	Node * new_node = new Node {
-		.status = Node::Status::STATUS_FRONTIER,
+		.status = Node::STATUS_FRONTIER,
 		.result = Node::RESULT_UNDETERMINED,
 		.distance = 0,
 		.next = NULL,
@@ -83,12 +98,12 @@ bool TableBase::AddUnmovesToFrontier(BoardState state) {
 	bool orig_color = state.white_to_move;
 	
 	// Board for finding moves
-	Board unmoves_board;
+	static Board unmoves_board;
 	unmoves_board.SetCurrent(state);
 	const MoveList * unmoves = unmoves_board.GetUnmoves();
 	
 	// Board for making moves
-	Board make_board;
+	static Board make_board;
 	state.white_to_move = !state.white_to_move;
 	make_board.SetCurrent(state);
 	
@@ -112,10 +127,6 @@ bool TableBase::AddUnmovesToFrontier(BoardState state) {
 	return true;
 }
 
-void TableBase::AddStaticPositions(TableBase::GeneratePositionsFunction generate_function) {
-	(this->*generate_function)(&TableBase::AddStaticallySolved);
-}
-
 void TableBase::Expand() {
 	
 	Board board;
@@ -134,11 +145,11 @@ void TableBase::Expand() {
 		}
 		
 		// Iterate through positions in frontier
-		PosIterator frontier_i = frontier.begin(), frontier_end = frontier.end();
+		auto frontier_i = frontier.begin(), frontier_end = frontier.end();
 		for (; frontier_i != frontier_end; frontier_i++) {
 			
-			BoardState state = frontier_i->first;
-			Node * node = frontier_i->second;
+			BoardState state = (*frontier_i)->first;
+			Node * node = (*frontier_i)->second;
 			if (!node) continue;
 			
 			// Determine results needed for an outcome
@@ -169,16 +180,19 @@ void TableBase::Expand() {
 			const Move * move_end = moves->End();
 			for (; move_i != move_end; move_i++) {
 				if (board.Make(*move_i)) {
+					Node * next_node = NULL;
+					PosIterator next_i;
+					
 					// Verify that not moved into check
 					if (board.InCheck(state.white_to_move)) goto unmake;
 					
 					// Find position in solved
-					PosIterator next_i = positions.find(board.GetCurrent());
+					next_i = positions.find(board.GetCurrent());
 					if (next_i == positions.end()) {
 						any_undetermined = true;
 						goto unmake;
 					}
-					Node * next_node = next_i->second;
+					next_node = next_i->second;
 					if (!next_node) goto unmake;
 					
 					// If the node is not solved or undetermined,
@@ -232,4 +246,27 @@ void TableBase::Expand() {
 			}
 		}
 	}
+}
+
+std::ostream & operator << (std::ostream & os, TableBase tb) {
+	
+	// Count frontier/solved nodes
+	int n_frontier = 0, n_solved = 0;
+	TableBase::PosIterator pos_i = tb.positions.begin();
+	TableBase::PosIterator pos_end = tb.positions.end();
+	for (; pos_i != pos_end; pos_i++) {
+		TableBase::Node * node = pos_i->second;
+		if (node) {
+			if (node->status == TableBase::Node::STATUS_FRONTIER) n_frontier++;
+			else if (node->status == TableBase::Node::STATUS_SOLVED) n_solved++;
+		}
+	}
+	
+	os << "+-------------------------------------------------------------------------------" << std::endl;
+	os << "| TABLE BASE" << std::endl;
+	os << "| Frontier: " << n_frontier << std::endl;
+	os << "| Solved:   " << n_solved << std::endl;
+	os << "+--------------------" << std::endl;
+	
+	return os;
 }

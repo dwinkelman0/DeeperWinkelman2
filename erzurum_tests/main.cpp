@@ -34,7 +34,13 @@ void Test_Optimization() {
 */
 
 int main(int argc, char ** argv) {
-	//TableBase tb;
+	TableBase tb;
+	
+	std::cout << sizeof(Move) << std::endl;
+	
+	Generate_KvK(&tb);
+	
+	std::cout << tb;
 	
 	return 0;
 }

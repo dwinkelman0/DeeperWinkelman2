@@ -24,13 +24,13 @@ public:
 		friend std::ostream & operator << (std::ostream & os, std::vector<Evaluation> path);
 	} __attribute__((__packed__));
 
-protected:
+public:
 	struct Node {
 		typedef enum : uint16_t {
 			RESULT_WHITE_WIN,
 			RESULT_BLACK_WIN,
 			RESULT_DRAW,
-			RESULT_INDETERMINED
+			RESULT_UNDETERMINED
 		} Result;
 		
 		typedef enum : uint16_t {
@@ -47,7 +47,7 @@ protected:
 	} __attribute__((__packed__));
 	
 protected:
-	typedef std::pair<BoardState, Node *>::iterator PosIterator;
+	typedef std::map<BoardState, Node *>::iterator PosIterator;
 	std::map<BoardState, Node *> positions;
 	std::vector<std::string> search_dirs;
 
@@ -59,23 +59,20 @@ public:
 	~TableBase();
 	
 	// Disable copy and assignment constructors to avoid internal pointer issues
-	TableBase(TableBase & other) = delete;
-	TableBase & operator = (TableBase other) = delete;
+	//TableBase(TableBase & other) = delete;
+	//TableBase & operator = (TableBase other) = delete;
 	
 /*******************************************************************************
  * Generation
  */
-protected:
+public:
 	bool AddStaticallySolved(BoardState state, uint8_t result);
+protected:
 	bool AddFrontier(BoardState state);
 	bool AddLinkedSolved(BoardState state, uint8_t result, Node * next, BoardState next_state, Move move_to_next);
 	bool AddUnmovesToFrontier(BoardState state);
 	
 public:
-	typedef bool (TableBase::*AddPositionFunction)(BoardState state, uint8_t result);
-	typedef void (TableBase::*GeneratePositionsFunction)(AddPositionFunction);
-	
-	void AddStaticPositions(GeneratePositionsFunction);
 	void Expand();
 	void Optimize();
 	

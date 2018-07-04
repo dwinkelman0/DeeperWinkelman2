@@ -78,39 +78,44 @@ void Test_BoardCompositeInit() {
 
 void Test_MoveGeneration() {
 	Board board;
-	for (int i = 0; i < N_TEST_POSITIONS_B; i++) {
-		BoardState state_init, state_final;
-		state_init.InitFromFEN(TEST_POSITIONS_B[i].fen_init);
-		state_final.InitFromFEN(TEST_POSITIONS_B[i].fen_final);
-		board.SetCurrent(state_init);
-		
-		const MoveList * moves = board.GetMoves();
-		//std::cout << board;
-		
-		bool status = board.Make(Move(TEST_POSITIONS_B[i].move));
-		if (!status) {
-			std::cout << "Error making the move " << TEST_POSITIONS_B[i].move << std::endl;
-			continue;
-		}
-		
-		//std::cout << board;
-		board.SetCurrent(state_final);
-		//std::cout << board;
-		
-		bool equal = board.GetCurrent() == state_final;
-		if (equal) std::cout << "Positions match" << std::endl;
-		else {
-			std::cout << "Positions DO NOT match" << std::endl;
-			std::cout << "Position after making move:" << std::endl;
-			std::cout << board.GetCurrent();
-			std::cout << "Position desired:" << std::endl;
-			std::cout << state_final;
-		}
-		//std::cout << std::endl << std::endl << std::endl;
-		
-		status = board.Unmake(1);
-		if (!status) {
-			std::cout << "Error unmaking the move " << TEST_POSITIONS_B[i].move << std::endl;
+	for (int a = 0; a < 10000; a++) {
+		if (a % 1000 == 0) std::cout << a << std::endl;
+		for (int i = 0; i < N_TEST_POSITIONS_B; i++) {
+			BoardState state_init, state_final;
+			state_init.InitFromFEN(TEST_POSITIONS_B[i].fen_init);
+			state_final.InitFromFEN(TEST_POSITIONS_B[i].fen_final);
+			board.SetCurrent(state_init);
+			
+			const MoveList * moves = board.GetMoves();
+			//std::cout << board;
+			
+			bool status = board.Make(Move(TEST_POSITIONS_B[i].move));
+			if (!status) {
+				//std::cout << "Error making the move " << TEST_POSITIONS_B[i].move << std::endl;
+				continue;
+			}
+			
+			/*
+			//std::cout << board;
+			board.SetCurrent(state_final);
+			//std::cout << board;
+			
+			bool equal = board.GetCurrent() == state_final;
+			if (equal) std::cout << "Positions match" << std::endl;
+			else {
+				std::cout << "Positions DO NOT match" << std::endl;
+				std::cout << "Position after making move:" << std::endl;
+				std::cout << board.GetCurrent();
+				std::cout << "Position desired:" << std::endl;
+				std::cout << state_final;
+			}
+			//std::cout << std::endl << std::endl << std::endl;
+			*/
+			
+			status = board.Unmake(1);
+			//if (!status) {
+			//	std::cout << "Error unmaking the move " << TEST_POSITIONS_B[i].move << std::endl;
+			//}
 		}
 	}
 }

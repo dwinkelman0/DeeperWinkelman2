@@ -4,9 +4,9 @@
   <Project Name="ardalan_tests" Path="ardalan_tests/ardalan_tests.project" Active="No"/>
   <Project Name="ardalan_python2" Path="ardalan_python/ardalan_python.project" Active="No"/>
   <Project Name="ardalan_python" Path="ardalan_python/ardalan_python.project" Active="No"/>
-  <Project Name="erzurum" Path="erzurum/erzurum.project" Active="No"/>
+  <Project Name="erzurum" Path="erzurum/erzurum.project" Active="Yes"/>
   <Project Name="dwbst" Path="bst/bst.project" Active="No"/>
-  <Project Name="erzurum_tests" Path="erzurum_tests/erzurum_tests.project" Active="Yes"/>
+  <Project Name="erzurum_tests" Path="erzurum_tests/erzurum_tests.project" Active="No"/>
   <BuildMatrix>
     <WorkspaceConfiguration Name="Release Python 3" Selected="no">
       <Environment/>

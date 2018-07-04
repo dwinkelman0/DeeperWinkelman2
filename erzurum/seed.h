@@ -3,7 +3,7 @@
 
 #include "tablebase.h"
 
-void Generate_KvK(TableBase::AddPositionFunction add_function);
-void Generate_KRvK(TableBase::AddPositionFunction add_function);
+void Generate_KvK(TableBase * tb_instance);
+void Generate_KRvK(TableBase * tb_instance);
 
 #endif
