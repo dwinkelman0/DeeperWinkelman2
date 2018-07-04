@@ -1,5 +1,22 @@
 #include "tablebase.h"
 
+std::ostream & operator << (std::ostream & os, TableBase::Evaluation eval) {
+	if (eval.result == TableBase::Evaluation::RESULT_DRAW) {
+		os << "Draw";
+	}
+	else if (eval.result == TableBase::Evaluation::RESULT_WHITE_WIN) {
+			os << "+#" << (eval.distance + 1) / 2 << " " << eval.move_to_next;
+	}
+	else if (eval.result == TableBase::Evaluation::RESULT_BLACK_WIN) {
+		os << "+#" << (eval.distance + 1) / 2 << " " << eval.move_to_next;
+	}
+	else {
+		os << "???";
+	}
+	
+	return os;
+}
+
 TableBase::TableBase() {
 	
 }
@@ -132,7 +149,7 @@ void TableBase::Expand() {
 	Board board;
 	
 	// Iterate through positions until frontier is empty
-	for (int pass = 0;; pass++) {
+	for (int pass = 0; pass < 100; pass++) {
 		
 		// Generate frontier list
 		// NOTE: std::map iterators are not invalidated by insertion
@@ -143,6 +160,9 @@ void TableBase::Expand() {
 				frontier.push_back(pos_i);
 			}
 		}
+		
+		// Exit if frontier is empty
+		if (frontier.size() == 0) break;
 		
 		// Iterate through positions in frontier
 		auto frontier_i = frontier.begin(), frontier_end = frontier.end();
@@ -245,10 +265,22 @@ void TableBase::Expand() {
 				
 			}
 		}
+		
+		std::cout << "After pass " << pass << ":" << std::endl;
+		std::cout << *this << std::endl;
 	}
+	
+	#if 0
+	PosIterator pos_i = positions.begin(), pos_end = positions.end();
+	for (; pos_i != pos_end; pos_i++) {
+		if (pos_i->second->status == Node::STATUS_FRONTIER) {
+			std::cout << pos_i->first.GetFEN() << std::endl;
+		}
+	}
+	#endif
 }
 
-std::ostream & operator << (std::ostream & os, TableBase tb) {
+std::ostream & operator << (std::ostream & os, TableBase & tb) {
 	
 	// Count frontier/solved nodes
 	int n_frontier = 0, n_solved = 0;

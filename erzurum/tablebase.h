@@ -14,10 +14,10 @@ public:
 			RESULT_WHITE_WIN,
 			RESULT_BLACK_WIN,
 			RESULT_DRAW,
-			RESULT_INDETERMINED
+			RESULT_UNDETERMINED
 		} Result;
 		
-		uint16_t result : 2, distance : 14;
+		uint16_t result : 2, distance : 13, white_to_move : 1;
 		Move move_to_next;
 		
 		friend std::ostream & operator << (std::ostream & os, Evaluation eval);
@@ -97,7 +97,7 @@ public:
  * Utility and Display
  */
 public:
-	friend std::ostream & operator << (std::ostream & os, TableBase tb);
+	friend std::ostream & operator << (std::ostream & os, TableBase & tb);
 
 };
 

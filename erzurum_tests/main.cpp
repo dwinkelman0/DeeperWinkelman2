@@ -39,6 +39,10 @@ int main(int argc, char ** argv) {
 	std::cout << sizeof(Move) << std::endl;
 	
 	Generate_KvK(&tb);
+	Generate_KRvK(&tb);
+	std::cout << tb << std::endl;
+	
+	tb.Expand();
 	
 	std::cout << tb;
 	
