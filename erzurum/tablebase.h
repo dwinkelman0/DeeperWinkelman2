@@ -1,5 +1,5 @@
-#ifndef _ERZURUM_TABLEBASE2_H_
-#define _ERZURUM_TABLEBASE2_H_
+#ifndef _ERZURUM_TABLEBASE_H_
+#define _ERZURUM_TABLEBASE_H_
 
 #include <board.h>
 
@@ -17,8 +17,7 @@ public:
 			RESULT_INDETERMINED
 		} Result;
 		
-		uint16_t result : 2;
-		uint16_t distance : 14;
+		uint16_t result : 2, distance : 14;
 		Move move_to_next;
 		
 		friend std::ostream & operator << (std::ostream & os, Evaluation eval);
@@ -39,8 +38,8 @@ protected:
 			STATUS_FRONTIER,
 			STATUS_SOLVED
 		} Status;
-		uint16_t status : 2, result : 2, distance : 12;
 		
+		uint16_t status : 2, result : 2, distance : 12;
 		Node * next;
 		Move move_to_next;
 		
@@ -48,6 +47,7 @@ protected:
 	} __attribute__((__packed__));
 	
 protected:
+	typedef std::pair<BoardState, Node *>::iterator PosIterator;
 	std::map<BoardState, Node *> positions;
 	std::vector<std::string> search_dirs;
 
@@ -56,6 +56,7 @@ protected:
  */
 public:
 	TableBase();
+	~TableBase();
 	
 	// Disable copy and assignment constructors to avoid internal pointer issues
 	TableBase(TableBase & other) = delete;
@@ -64,9 +65,17 @@ public:
 /*******************************************************************************
  * Generation
  */
+protected:
+	bool AddStaticallySolved(BoardState state, uint8_t result);
+	bool AddFrontier(BoardState state);
+	bool AddLinkedSolved(BoardState state, uint8_t result, Node * next, BoardState next_state, Move move_to_next);
+	bool AddUnmovesToFrontier(BoardState state);
+	
 public:
-	void AddStaticPositions(void (*generation_function)(
-		void (TableBase::*add_function)(BoardState state, uint8_t result)));
+	typedef bool (TableBase::*AddPositionFunction)(BoardState state, uint8_t result);
+	typedef void (TableBase::*GeneratePositionsFunction)(AddPositionFunction);
+	
+	void AddStaticPositions(GeneratePositionsFunction);
 	void Expand();
 	void Optimize();
 	
@@ -87,7 +96,11 @@ public:
 	bool LoadFromDirectory(const char * dir);
 	bool SaveToDirectory(const char * dir);
 	
-protected:
+/*******************************************************************************
+ * Utility and Display
+ */
+public:
+	friend std::ostream & operator << (std::ostream & os, TableBase tb);
 
 };
 

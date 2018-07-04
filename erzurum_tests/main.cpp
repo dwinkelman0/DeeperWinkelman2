@@ -1,6 +1,7 @@
 //#include <seed.h>
 
 #include <tablebase.h>
+#include <seed.h>
 
 #include <iostream>
 #include <string.h>
