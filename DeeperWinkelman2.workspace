@@ -1,10 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <CodeLite_Workspace Name="DeeperWinkelman2" Database="" Version="10.0.0">
-  <Project Name="ardalan" Path="ardalan/ardalan.project" Active="No"/>
+  <Project Name="ardalan" Path="ardalan/ardalan.project" Active="Yes"/>
   <Project Name="ardalan_tests" Path="ardalan_tests/ardalan_tests.project" Active="No"/>
   <Project Name="ardalan_python2" Path="ardalan_python/ardalan_python.project" Active="No"/>
   <Project Name="ardalan_python" Path="ardalan_python/ardalan_python.project" Active="No"/>
-  <Project Name="erzurum" Path="erzurum/erzurum.project" Active="Yes"/>
+  <Project Name="erzurum" Path="erzurum/erzurum.project" Active="No"/>
   <Project Name="dwbst" Path="bst/bst.project" Active="No"/>
   <Project Name="erzurum_tests" Path="erzurum_tests/erzurum_tests.project" Active="No"/>
   <BuildMatrix>

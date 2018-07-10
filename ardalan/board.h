@@ -93,6 +93,8 @@ public:
 	 */
 	bool Unmake(uint16_t n_moves);
 	
+	bool MakePGNMoves(const char * pgn);
+	
 	/**
 	 * @brief Generate the available pseudo-legal moves for whichever color to move.
 	 * @return Returns an unalterable pointer to the cached moves associated with the current Board Composite.

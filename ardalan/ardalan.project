@@ -8,6 +8,7 @@
   <Description/>
   <Dependencies/>
   <VirtualDirectory Name="src">
+    <File Name="pgn.cpp"/>
     <File Name="movegen.cpp"/>
     <File Name="datatypes.cpp"/>
     <File Name="board.cpp"/>
