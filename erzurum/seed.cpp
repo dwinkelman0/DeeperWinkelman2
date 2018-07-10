@@ -150,3 +150,41 @@ void Generate_KRvK(TableBase * tb_instance) {
 	state.InitFromFEN("8/8/8/8/8/8/5KR1/7k b - - 0 1");
 	tb_instance->AddStaticallySolved(state, res_draw);
 }
+
+void Patch_KRvK(TableBase * tb_instance) {
+	BoardState state;
+	memset(state.squares, 0, 64);
+	state.white_to_move = false;
+	state.white_OO = state.white_OOO = state.black_OO = state.black_OOO = false;
+	state.ep_target = 0;
+	
+	Board board;
+	
+	for (int wking = 0; wking < 64; wking++) {
+		for (int bking = 0; bking < 64; bking++) {
+			if (wking == bking) continue;
+			
+			for (int wrook = 0; wrook < 64; wrook++) {
+				if (wrook == wking || wrook == bking) continue;
+				
+				state.squares[wking] = WHITE_KING;
+				state.squares[bking] = BLACK_KING;
+				state.squares[wrook] = WHITE_ROOK;
+				
+				state.white_to_move = false;
+				board.SetCurrent(state);
+				if (!board.InCheck(true)) {
+					TableBase::Evaluation eval = tb_instance->Evaluate(state);
+					if (eval.result == TableBase::Evaluation::RESULT_UNDETERMINED) {
+						tb_instance->AddStaticallySolved(
+							state, TableBase::Evaluation::RESULT_DRAW);
+					}
+				}				
+				
+				state.squares[wking] = EMPTY;
+				state.squares[bking] = EMPTY;
+				state.squares[wrook] = EMPTY;
+			}
+		}
+	}
+}

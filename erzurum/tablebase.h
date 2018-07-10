@@ -43,6 +43,8 @@ public:
 		Node * next;
 		Move move_to_next;
 		
+		MoveList move_cache;
+		
 		friend std::ostream & operator << (std::ostream & os, Node node);
 	} __attribute__((__packed__));
 	
@@ -98,7 +100,7 @@ public:
  */
 public:
 	friend std::ostream & operator << (std::ostream & os, TableBase & tb);
-
+	void PrintStrata();
 };
 
 #endif

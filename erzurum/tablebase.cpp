@@ -149,7 +149,7 @@ void TableBase::Expand() {
 	Board board;
 	
 	// Iterate through positions until frontier is empty
-	for (int pass = 0; pass < 100; pass++) {
+	for (int pass = 0;; pass++) {
 		
 		// Generate frontier list
 		// NOTE: std::map iterators are not invalidated by insertion
@@ -195,7 +195,10 @@ void TableBase::Expand() {
 			
 			// Filter through possible moves from this position
 			// If any win conditions are found, exit immediately
-			const MoveList * moves = board.GetMoves();
+			if (!node->move_cache.IsValid()) {
+				node->move_cache = *board.GetMoves();
+			}
+			const MoveList * moves = &node->move_cache;
 			const Move * move_i = moves->Begin();
 			const Move * move_end = moves->End();
 			for (; move_i != move_end; move_i++) {
@@ -245,8 +248,9 @@ void TableBase::Expand() {
 						best_move = *move_i;
 					}
 					
-					unmake:
-					board.Unmake(1);
+					unmake: {
+						board.Unmake(1);
+					}
 				}
 			}
 			
@@ -269,15 +273,126 @@ void TableBase::Expand() {
 		std::cout << "After pass " << pass << ":" << std::endl;
 		std::cout << *this << std::endl;
 	}
+}
+
+void TableBase::Optimize() {
 	
-	#if 0
-	PosIterator pos_i = positions.begin(), pos_end = positions.end();
-	for (; pos_i != pos_end; pos_i++) {
-		if (pos_i->second->status == Node::STATUS_FRONTIER) {
-			std::cout << pos_i->first.GetFEN() << std::endl;
+	Board board;
+	
+	PrintStrata();
+	
+	// Iterate through all positions until all positions are stable
+	for (int pass = 0;; pass++) {
+		int n_not_optimal = 0;
+		
+		PosIterator pos_i = positions.begin();
+		PosIterator pos_end = positions.end();
+		for (; pos_i != pos_end; pos_i++) {
+			
+			BoardState state = pos_i->first;
+			Node * node = pos_i->second;
+			if (!node) {
+				n_not_optimal++;
+				continue;
+			}
+			
+			// Nothing to be done for draws
+			if (node->result == Node::RESULT_DRAW) continue;
+			
+			// Nothing to be done for terminal positions
+			if (node->distance == 0) continue;
+			
+			// Determine if the side to move is winning
+			// Winning sides minimize distance to end, losing sides maximize
+			bool is_minimizing =
+				( state.white_to_move && node->result == Node::RESULT_WHITE_WIN) ||
+				(!state.white_to_move && node->result == Node::RESULT_BLACK_WIN);
+				
+			uint16_t best_distance = is_minimizing ? 0xffff : 0;
+			Node * best_node = NULL;
+			Move best_move;
+				
+			// Iterate through moves to check child positions
+			board.SetCurrent(state);
+			if (!node->move_cache.IsValid()) {
+				node->move_cache = *board.GetMoves();
+			}
+			const MoveList * moves = &node->move_cache;
+			const Move * move_i = moves->Begin();
+			const Move * move_end = moves->End();
+			for (; move_i != move_end; move_i++) {
+				if (board.Make(*move_i)) {
+					
+					PosIterator next_i;
+					Node * next_node;
+					
+					// Verify that not moved into check
+					if (board.InCheck(state.white_to_move)) goto unmake;
+					
+					// Find position in solved
+					next_i = positions.find(board.GetCurrent());
+					if (next_i == positions.end()) {
+						n_not_optimal++;
+						goto unmake;
+					}
+					next_node = next_i->second;
+					if (!next_node) goto unmake;
+					
+					// Check that position has same result
+					if (next_node->result != node->result) goto unmake;
+					
+					// See if the next position improves upon the others
+					if (( is_minimizing && next_node->distance < best_distance) ||
+						(!is_minimizing && next_node->distance > best_distance))
+					{
+						best_distance = next_node->distance;
+						best_node = next_node;
+						best_move = *move_i;
+					}
+					
+					unmake: {
+						board.Unmake(1);
+					}
+				}
+			}
+			
+			// Update stored distance in case next node changed
+			node->distance = node->next->distance + 1;
+			
+			// See if best node out-performs already-established best node
+			if (( is_minimizing && best_distance < node->next->distance) ||
+				(!is_minimizing && best_distance > node->next->distance))
+			{
+				node->next = best_node;
+				node->move_to_next = best_move;
+				node->distance = best_node->distance + 1;
+				n_not_optimal++;
+			}
 		}
+		
+		std::cout << "Pass " << pass << ": " << n_not_optimal << " not optimal" << std::endl;
+		if (n_not_optimal == 0) break;
 	}
-	#endif
+	
+	PrintStrata();
+}
+
+TableBase::Evaluation TableBase::Evaluate(BoardState state) {
+	Evaluation output;
+	
+	PosIterator pos_i = positions.find(state);
+	if (pos_i == positions.end() || !pos_i->second) {
+		output.result = Evaluation::RESULT_UNDETERMINED;
+		return output;
+	}
+	else {
+		Node * node = pos_i->second;
+		output.result = node->result;
+		output.distance = node->distance;
+		output.white_to_move = state.white_to_move;
+		output.move_to_next = node->move_to_next;
+		return output;
+	}
 }
 
 std::ostream & operator << (std::ostream & os, TableBase & tb) {
@@ -301,4 +416,20 @@ std::ostream & operator << (std::ostream & os, TableBase & tb) {
 	os << "+--------------------" << std::endl;
 	
 	return os;
+}
+
+void TableBase::PrintStrata() {
+	int count[1024];
+	for (int i = 0; i < 1024; i++) count[i] = 0;
+	
+	PosIterator pos_i = positions.begin();
+	PosIterator pos_end = positions.end();
+	for (; pos_i != pos_end; pos_i++) {
+		count[pos_i->second->distance]++;
+	}
+	
+	for (int i = 0; i < 1024; i++) {
+		if (count[i] == 0) break;
+		std::cout << " | " << i << ": " << count[i] << std::endl;
+	}
 }

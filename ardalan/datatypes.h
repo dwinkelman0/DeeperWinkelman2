@@ -134,7 +134,7 @@ public:
 	
 public:
 	friend std::ostream & operator << (std::ostream & os, const MoveList & ml);
-};
+} __attribute__((__packed__));
 
 /**
  * @class BoardState
