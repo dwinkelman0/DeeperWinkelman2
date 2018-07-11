@@ -23,6 +23,17 @@ Board::~Board() {
 	}
 }
 
+std::vector<Move> Board::GetMadeMoves() {
+	std::vector<Move> output = std::vector<Move>(GetDepth());
+	std::vector<Move>::iterator output_i = output.begin();
+	BoardComposite * pos = history_begin;
+	while (pos != current) {
+		*(output_i++) = pos->move_to_next;
+		pos = pos->next;
+	}
+	return output;
+}
+
 const MoveList * Board::GetMoves() {
 	if (!current->move_cache.IsValid()) {
 		mgen.GetMoves(current, &(current->move_cache));

@@ -190,4 +190,9 @@ void Test_PGN() {
 	Board board;
 	board.SetCurrent(BoardState());
 	board.MakePGNMoves(game);
+	
+	std::vector<Move> moves = board.GetMadeMoves();
+	for (int i = 0; i < moves.size(); i++) {
+		std::cout << moves[i] << std::endl;
+	}
 }

@@ -4,6 +4,8 @@
 #include "datatypes.h"
 #include "movegen.h"
 
+#include <vector>
+
 /**
  * @class Board
  * @author Daniel-Winkelman
@@ -60,6 +62,8 @@ public:
 	inline int GetDepth() const {
 		return depth;
 	}
+	
+	std::vector<Move> GetMadeMoves();
 	
 	/**
 	 * @brief Make a move that changes the board state.
