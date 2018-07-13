@@ -341,17 +341,20 @@ std::string BoardState::GetFEN() const {
 	return ss.str();
 }
 
+Hash_t BoardState::GetHash() const {
+	Hash_t output = white_to_move ? ZOBRIST_WHITE_TO_MOVE : 0;
+	output ^= ZOBRIST_EN_PASSANT[ep_target];
+	output ^= ZOBRIST_WHITE_OO[white_OO];
+	output ^= ZOBRIST_WHITE_OOO[white_OOO];
+	output ^= ZOBRIST_BLACK_OO[black_OO];
+	output ^= ZOBRIST_BLACK_OOO[black_OOO];
+	for (int i = 0; i < 64; i++) {
+		output ^= ZOBRIST_SQUARES[squares[i]][i];
+	}
+	return output;
+}
+
 bool BoardState::operator == (BoardState other) const {
-	/*
-	return
-		memcmp(this->squares, other.squares, 64) == 0 &&
-		this->white_to_move == other.white_to_move &&
-		this->white_OO == other.white_OO &&
-		this->white_OOO == other.white_OOO &&
-		this->black_OO == other.black_OO &&
-		this->black_OOO == other.black_OOO &&
-		this->ep_target == other.ep_target;
-	*/
 	other.n_ply_without_progress = this->n_ply_without_progress;
 	uint8_t * this_bytes = (uint8_t *)this;
 	uint8_t * other_bytes = (uint8_t *)&other;
@@ -359,22 +362,6 @@ bool BoardState::operator == (BoardState other) const {
 }
 
 bool BoardState::operator < (BoardState other) const {
-	/*
-	if (memcmp(this->squares, other.squares, 64) < 0) return true;
-	if (this->white_to_move < other.white_to_move) return true;
-	else if (this->white_to_move > other.white_to_move) return false;
-	if (this->white_OO < other.white_OO) return true;
-	else if (this->white_OO > other.white_OO) return false;
-	if (this->white_OOO < other.white_OOO) return true;
-	else if (this->white_OOO > other.white_OOO) return false;
-	if (this->black_OO < other.black_OO) return true;
-	else if (this->black_OO > other.black_OO) return false;
-	if (this->black_OOO < other.black_OOO) return true;
-	else if (this->black_OOO > other.black_OOO) return false;
-	if (this->ep_target < other.ep_target) return true;
-	else if (this->ep_target > other.ep_target) return false;
-	return false;
-	*/
 	other.n_ply_without_progress = this->n_ply_without_progress;
 	uint8_t * this_bytes = (uint8_t *)this;
 	uint8_t * other_bytes = (uint8_t *)&other;
@@ -422,9 +409,7 @@ bool BoardComposite::Init(const BoardState state) {
 	// Reset the state
 	white = black = wpawns = bpawns = 0;
 	wking_pos = bking_pos = 255;
-	#ifdef ARDALAN_ZOBRIST_HASHING
-	hash = 0;
-	#endif
+	hash = state.GetHash();
 	#ifdef ARDALAN_DISCRETE_SCORING
 	material_score = 0;
 	#endif
@@ -465,9 +450,7 @@ std::ostream & operator << (std::ostream & os, const BoardComposite & bc) {
 	os << "| White Pawns: " << std::setfill('0') << std::setw(16) << bc.wpawns << std::endl;
 	os << "| Black:       " << std::setfill('0') << std::setw(16) << bc.black << std::endl;
 	os << "| Black Pawns: " << std::setfill('0') << std::setw(16) << bc.bpawns << std::endl;
-	#ifdef ARDALAN_ZOBRIST_HASHING
 	os << "| Hash:        " << std::setfill('0') << std::setw(16) << bc.hash << std::endl;
-	#endif
 	os << std::dec;
 	os << "| Roster: " << std::endl;
 	os << "|     White: [" << (int)bc.roster[WHITE_PAWN] << " pawns, " << (int)bc.roster[WHITE_KNIGHT] << " knights, " << (int)bc.roster[WHITE_BISHOP] << " bishops, " << (int)bc.roster[WHITE_ROOK] << " rooks, " << (int)bc.roster[WHITE_QUEEN] << " queens, " << (int)bc.roster[WHITE_KING] << " kings]" << std::endl;

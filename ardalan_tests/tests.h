@@ -7,5 +7,6 @@ void Test_MoveGeneration();
 void Test_CheckDetection();
 void Test_UnmoveGeneration();
 void Test_PGN();
+void Test_Hashing();
 
 #endif

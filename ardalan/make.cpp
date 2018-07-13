@@ -325,6 +325,28 @@ bool Board::MakeComplete(const BoardComposite * orig, BoardComposite * target,
 	target->state.black_OOO = orig->state.black_OOO &&
 		target->state.squares[60] == BLACK_KING && target->state.squares[56] == BLACK_ROOK;
 		
+	// Hash
+	target->hash = orig->hash
+		// Squares
+		^ ZOBRIST_SQUARES[start_piece][start]
+		^ ZOBRIST_SQUARES[EMPTY][start]
+		^ ZOBRIST_SQUARES[end_piece][end]
+		^ ZOBRIST_SQUARES[promotion_piece][end]
+		// Castling
+		^ ZOBRIST_WHITE_OO[target->state.white_OO]
+		^ ZOBRIST_WHITE_OO[orig->state.white_OO]
+		^ ZOBRIST_WHITE_OOO[target->state.white_OOO]
+		^ ZOBRIST_WHITE_OOO[orig->state.white_OOO]
+		^ ZOBRIST_BLACK_OO[target->state.black_OO]
+		^ ZOBRIST_BLACK_OO[orig->state.black_OO]
+		^ ZOBRIST_BLACK_OOO[target->state.black_OOO]
+		^ ZOBRIST_BLACK_OOO[orig->state.black_OOO]
+		// En Passant
+		^ ZOBRIST_EN_PASSANT[target->state.ep_target]
+		^ ZOBRIST_EN_PASSANT[orig->state.ep_target]
+		// Color
+		^ ZOBRIST_WHITE_TO_MOVE;
+		
 	// Transfer color to next
 	target->state.white_to_move = orig->state.white_to_move;
 	

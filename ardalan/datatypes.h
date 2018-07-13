@@ -1,6 +1,8 @@
 #ifndef _ARDALAN_DATATYPES_H_
 #define _ARDALAN_DATATYPES_H_
 
+#include "hash.h"
+
 #include <stdint.h>
 #include <string>
 
@@ -187,33 +189,11 @@ public:
 	bool InitFromFEN(const char * fen);
 	std::string GetFEN() const;
 	
+	Hash_t GetHash() const;
+	
 	// Output for visualization
 	friend std::ostream & operator << (std::ostream & os, const BoardState & bc);
 };
-
-#ifdef ARDALAN_ZOBRIST_HASHING
-/**
- * @class ZobristKeys
- * @author Daniel-Winkelman
- * @date 25/03/18
- * @file datatypes.h
- * @brief Stores keys for Zobrist hashing comparison optimization
- */
-struct ZobristKeys {
-public:
-	Hash_t KEY_SQUARES[64][16] = { 0 };
-	Hash_t KEY_WHITE_TO_MOVE = 0;
-	Hash_t KEY_WHITE_OO = 0;
-	Hash_t KEY_WHITE_OOO = 0;
-	Hash_t KEY_BLACK_OO = 0;
-	Hash_t KEY_BLACK_OOO = 0;
-	Hash_t KEY_EP_TARGET[16] = { 0 };
-	
-	void GenerateRandom();
-	void ImportFromFile(const char * file);
-	void ExportToFile(const char * file);
-};
-#endif
 
 /**
  * @class BoardComposite
@@ -229,9 +209,6 @@ public:
  * and a field for storing incremental score data.
  */
 struct BoardComposite {
-	#ifdef ARDALAN_ZOBRIST_HASHING
-	static ZobristKeys ZOBRIST_KEYS;
-	#endif
 	#ifdef ARDALAN_DISCRETE_SCORING
 	static const Score_t PIECE_SCORES[16];
 	#endif
@@ -246,10 +223,8 @@ public:
 	// Maintain the positions of white and black kings to help check detection
 	uint8_t wking_pos = 255, bking_pos = 255;
 	
-	#ifdef ARDALAN_ZOBRIST_HASHING
 	// Maintain a 64-bit hash to accelerate position comparison
 	Hash_t hash = 0;
-	#endif
 	
 	#ifdef ARDALAN_DISCRETE_SCORING
 	// Maintain a running total of material to accelerate evaluation
@@ -274,11 +249,8 @@ public:
 	bool Init(const BoardState state);
 	
 	inline bool operator == (const BoardComposite & other) const {
-		#ifdef ARDALAN_ZOBRIST_HASHING
+		// Short-circuit compare the hash
 		return this->hash == other.hash && this->state == other.state;
-		#else
-		return this->state == other.state;
-		#endif
 	}
 	
 public:

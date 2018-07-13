@@ -196,3 +196,15 @@ void Test_PGN() {
 		std::cout << moves[i] << std::endl;
 	}
 }
+
+void Test_Hashing() {
+	Board board;
+	
+	board.SetCurrent(BoardState());
+	board.MakePGNMoves("e4 e5 Nf3 Nc6 Bb5 a6 Ba4 Nf6 O-O");
+	std::cout << board;
+	
+	board.SetCurrent(BoardState());
+	board.MakePGNMoves("e4 e5 Nf3 Nc6 Bb5 a6 O-O Nf6 Ba4");
+	std::cout << board;
+}

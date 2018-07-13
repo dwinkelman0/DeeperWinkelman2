@@ -15,6 +15,7 @@
     <File Name="make.cpp"/>
   </VirtualDirectory>
   <VirtualDirectory Name="include">
+    <File Name="hash.h"/>
     <File Name="movegen.h"/>
     <File Name="datatypes.h"/>
     <File Name="board.h"/>
