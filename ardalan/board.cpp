@@ -6,6 +6,7 @@
 
 Board::Board() {
 	current = new BoardComposite();
+	current->Init(BoardState());
 	history_begin = current;
 	depth = 0;
 }

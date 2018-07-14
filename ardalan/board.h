@@ -47,6 +47,15 @@ public:
 	}
 	
 	/**
+	 * @brief Get the Zobrist hash of the current board state.
+	 * @return 
+	 */
+	inline Hash_t GetHash() const {
+		// Current is guaranteed to exist because it is allocated in constructor
+		return current->hash;
+	}
+	
+	/**
 	 * @brief Get the initial board state.
 	 * @return A fresh copy of the state.
 	 */

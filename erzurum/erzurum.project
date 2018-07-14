@@ -8,6 +8,7 @@
   <Description/>
   <Dependencies/>
   <VirtualDirectory Name="src">
+    <File Name="file.cpp"/>
     <File Name="tablebase.cpp"/>
     <File Name="seed.cpp"/>
   </VirtualDirectory>

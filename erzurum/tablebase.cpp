@@ -54,7 +54,8 @@ bool TableBase::AddStaticallySolved(BoardState state, uint8_t result) {
 		.result = result,
 		.distance = 0,
 		.next = NULL,
-		.move_to_next = Move()
+		.move_to_next = Move(),
+		.hash = 0
 	};
 	positions.insert(std::pair<BoardState, Node *>(state, new_node));
 	
@@ -77,7 +78,8 @@ bool TableBase::AddFrontier(BoardState state) {
 		.result = Node::RESULT_UNDETERMINED,
 		.distance = 0,
 		.next = NULL,
-		.move_to_next = Move()
+		.move_to_next = Move(),
+		.hash = 0
 	};
 	positions.insert(std::pair<BoardState, Node *>(state, new_node));
 	return true;
@@ -180,6 +182,7 @@ void TableBase::Expand() {
 			// Check whether there was a missed stalemate/checkmate
 			// Prevents error conditions later, and pre-generates moves
 			board.SetCurrent(state);
+			node->hash = board.GetHash();
 			if (board.IsCheckmate()) {
 				AddStaticallySolved(state, cond_win);
 			}

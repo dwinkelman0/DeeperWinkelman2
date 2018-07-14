@@ -44,6 +44,7 @@ public:
 		Move move_to_next;
 		
 		MoveList move_cache;
+		Hash_t hash;
 		
 		friend std::ostream & operator << (std::ostream & os, Node node);
 	} __attribute__((__packed__));
@@ -51,7 +52,6 @@ public:
 protected:
 	typedef std::map<BoardState, Node *>::iterator PosIterator;
 	std::map<BoardState, Node *> positions;
-	std::vector<std::string> search_dirs;
 
 /*******************************************************************************
  * Constructors
@@ -91,9 +91,13 @@ public:
  * File Input/Output
  */
 public:
-	void AddSearchDirectory(const char * dir);
-	bool LoadFromDirectory(const char * dir);
+	bool ImportFromDirectory(const char * dir);
 	bool SaveToDirectory(const char * dir);
+	bool MergeToDirectory(const char * dir);
+	
+protected:
+	std::map<BoardState, Node *> ImportFromFile(const char * dir);
+	bool SaveToFile(const char * dir, std::map<BoardState, Node *> positions);
 	
 /*******************************************************************************
  * Utility and Display
