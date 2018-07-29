@@ -68,4 +68,5 @@
       </Completion>
     </Configuration>
   </Settings>
+  <Dependencies Name="Release"/>
 </CodeLite_Project>

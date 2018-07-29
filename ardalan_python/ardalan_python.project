@@ -122,4 +122,6 @@
       </Completion>
     </Configuration>
   </Settings>
+  <Dependencies Name="Python2"/>
+  <Dependencies Name="Python3"/>
 </CodeLite_Project>
