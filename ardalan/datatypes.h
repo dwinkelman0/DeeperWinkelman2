@@ -182,8 +182,12 @@ public:
 	
 public:
 	// Compare critical states
+	int Compare(BoardState other) const;
 	bool operator == (BoardState other) const;
 	bool operator < (BoardState other) const;
+	bool operator > (BoardState other) const;
+	bool operator <= (BoardState other) const;
+	bool operator >= (BoardState other) const;
 	
 public:
 	bool InitFromFEN(const char * fen);

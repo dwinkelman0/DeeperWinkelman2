@@ -50,8 +50,16 @@ public:
 	} __attribute__((__packed__));
 	
 protected:
+	#ifdef USE_STD_MAP
 	typedef std::map<BoardState, Node *>::iterator PosIterator;
 	std::map<BoardState, Node *> positions;
+	#else
+	static int positions_cmp_func(BoardState a, BoardState b) {
+		return a.Compare(b);
+	}
+	typedef BST<BoardState, Node *>::Node ** PosIterator;
+	BST<BoardState, Node *> * positions;
+	#endif
 
 /*******************************************************************************
  * Constructors

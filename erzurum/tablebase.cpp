@@ -18,26 +18,50 @@ std::ostream & operator << (std::ostream & os, TableBase::Evaluation eval) {
 }
 
 TableBase::TableBase() {
-	
+	#ifdef USE_STD_MAP
+	#else
+	positions = new BST<BoardState, Node *>;
+	positions->compare_func = positions_cmp_func;
+	#endif
 }
 
 TableBase::~TableBase() {
+	#ifdef USE_STD_MAP
 	PosIterator pos_i = positions.begin();
 	PosIterator pos_end = positions.end();
+	#else
+	unsigned int n_positions;
+	PosIterator * serialized = positions->Serialize(&n_positions);
+	PosIterator pos_i = serialized;
+	PosIterator pos_end = pos_i + n_positions;
+	#endif
 	for (; pos_i != pos_end; pos_i++) {
+		#ifdef USE_STD_MAP
 		Node * node = pos_i->second;
+		#else
+		Node * node = (*pos_i)->GetValue();
+		#endif
 		if (node) {
 			delete node;
 		}
 	}
+	#ifdef USE_STD_MAP
+	#else
+	delete[] 
 }
 
 bool TableBase::AddStaticallySolved(BoardState state, uint8_t result) {
 	
 	// Check that node does not already exist
+	#ifdef USE_STD_MAP
 	PosIterator pos_i = positions.find(state);
 	if (pos_i != positions.end()) {
 		Node * node = pos_i->second;
+	#else
+	PosIterator pos_i = positions->Find(state);
+	if (pos_i) {
+		Node * node = (*pos_i)->GetValue();
+	#endif
 		// If already exists, just modify
 		if (node) {
 			node->status = Node::Status::STATUS_SOLVED;
@@ -57,7 +81,11 @@ bool TableBase::AddStaticallySolved(BoardState state, uint8_t result) {
 		.move_to_next = Move(),
 		.hash = 0
 	};
+	#ifdef USE_STD_MAP
 	positions.insert(std::pair<BoardState, Node *>(state, new_node));
+	#else
+	positions->Insert(state, new_node);
+	#endif
 	
 	// Add unmoves to frontier
 	AddUnmovesToFrontier(state);
@@ -68,9 +96,15 @@ bool TableBase::AddStaticallySolved(BoardState state, uint8_t result) {
 bool TableBase::AddFrontier(BoardState state) {
 	
 	// Check that node does not already exist
+	#ifdef USE_STD_MAP
 	if (positions.find(state) != positions.end()) {
 		return false;
 	}
+	#else
+	if (positions->Find(state)) {
+		return false;
+	}
+	#endif
 	
 	// Insert new node (in new memory) into table
 	Node * new_node = new Node {
@@ -81,18 +115,30 @@ bool TableBase::AddFrontier(BoardState state) {
 		.move_to_next = Move(),
 		.hash = 0
 	};
+	#ifdef USE_STD_MAP
 	positions.insert(std::pair<BoardState, Node *>(state, new_node));
+	#else
+	positions->Insert(state, new_node);
+	#endif
 	return true;
 }
 
 bool TableBase::AddLinkedSolved(BoardState state, uint8_t result, Node * next, BoardState next_state, Move move_to_next) {
 	
 	// Find positions in table, make sure already exist
+	#ifdef USE_STD_MAP
 	PosIterator pos_i = positions.find(state);
 	PosIterator next_i = positions.find(next_state);
 	if (pos_i == positions.end() || next_i == positions.end()) {
 		return false;
 	}
+	#else
+	PosIterator pos_i = positions->Find(state);
+	PosIterator next_i = positions->Find(next_state);
+	if (!pos_i || !next_i) {
+		return false;
+	}
+	#endif
 	
 	// Modify solved position
 	Node * node = pos_i->second;

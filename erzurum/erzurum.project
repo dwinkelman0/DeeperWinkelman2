@@ -8,11 +8,13 @@
   <Description/>
   <Dependencies/>
   <VirtualDirectory Name="src">
+    <File Name="ibst.cpp"/>
     <File Name="file.cpp"/>
     <File Name="tablebase.cpp"/>
     <File Name="seed.cpp"/>
   </VirtualDirectory>
   <VirtualDirectory Name="include">
+    <File Name="ibst.h"/>
     <File Name="seed.h"/>
     <File Name="tablebase.h"/>
   </VirtualDirectory>

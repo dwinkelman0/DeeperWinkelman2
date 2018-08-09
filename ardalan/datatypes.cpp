@@ -354,18 +354,31 @@ Hash_t BoardState::GetHash() const {
 	return output;
 }
 
-bool BoardState::operator == (BoardState other) const {
+int BoardState::Compare(BoardState other) const {
 	other.n_ply_without_progress = this->n_ply_without_progress;
 	uint8_t * this_bytes = (uint8_t *)this;
 	uint8_t * other_bytes = (uint8_t *)&other;
-	return memcmp(this_bytes, other_bytes, sizeof(BoardState)) == 0;
+	return memcmp(this_bytes, other_bytes, sizeof(BoardState));
+}
+
+bool BoardState::operator == (BoardState other) const {
+	return Compare(other) == 0;
 }
 
 bool BoardState::operator < (BoardState other) const {
-	other.n_ply_without_progress = this->n_ply_without_progress;
-	uint8_t * this_bytes = (uint8_t *)this;
-	uint8_t * other_bytes = (uint8_t *)&other;
-	return memcmp(this_bytes, other_bytes, sizeof(BoardState)) < 0;
+	return Compare(other) < 0;
+}
+
+bool BoardState::operator > (BoardState other) const {
+	return Compare(other) > 0;
+}
+
+bool BoardState::operator <= (BoardState other) const {
+	return Compare(other) <= 0;
+}
+
+bool BoardState::operator >= (BoardState other) const {
+	return Compare(other) >= 0;
 }
 
 std::ostream & operator << (std::ostream & os, const BoardState & bs) {
