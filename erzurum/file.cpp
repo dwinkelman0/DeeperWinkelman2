@@ -1,5 +1,7 @@
 #include "tablebase.h"
 
+#include <string.h>
+
 const Hash_t FILE_BITMASK = 0x0000000000003fff;
 const Hash_t N_FILES      = 0x0000000000004000;
 
@@ -9,7 +11,7 @@ struct PositionData {
 
 bool TableBase::ImportFromDirectory(const char * dir) {
 	
-	char buffer = new char[strlen(dir) + 32];
+	char * buffer = new char[strlen(dir) + 32];
 	for (int i = 0; i <= N_FILES; i++) {
 		sprintf(buffer, "%s/%x.erz", dir, i);
 		positions.insert(ImportFromFile(buffer));
@@ -22,7 +24,7 @@ bool TableBase::SaveToDirectory(const char * dir) {
 	
 	std::map<Hash_t, 
 	
-	char buffer = new char[strlen(dir) + 32];
+	char * buffer = new char[strlen(dir) + 32];
 	for (int i = 0; i < N_FILES; i++) {
 		sprintf(buffer, "%s/%x.erz", dir, i);
 		if (!SaveToFile())

@@ -312,4 +312,4 @@ typename BST<K, V>::Node * BST<K, V>::Attach(BST::Node * node) {
 	return node;
 }
 
-template class BST<BoardState, BoardState::Node *>
+template class BST<BoardState, TableBase::Node *>;

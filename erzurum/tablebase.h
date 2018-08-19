@@ -1,6 +1,8 @@
 #ifndef _ERZURUM_TABLEBASE_H_
 #define _ERZURUM_TABLEBASE_H_
 
+#include "ibst.h"
+
 #include <board.h>
 
 #include <iostream>
@@ -57,7 +59,7 @@ protected:
 	static int positions_cmp_func(BoardState a, BoardState b) {
 		return a.Compare(b);
 	}
-	typedef BST<BoardState, Node *>::Node ** PosIterator;
+	typedef BST<BoardState, Node *>::Node * PosIterator;
 	BST<BoardState, Node *> * positions;
 	#endif
 

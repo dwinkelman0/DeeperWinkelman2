@@ -29,25 +29,25 @@ TableBase::~TableBase() {
 	#ifdef USE_STD_MAP
 	PosIterator pos_i = positions.begin();
 	PosIterator pos_end = positions.end();
-	#else
-	unsigned int n_positions;
-	PosIterator * serialized = positions->Serialize(&n_positions);
-	PosIterator pos_i = serialized;
-	PosIterator pos_end = pos_i + n_positions;
-	#endif
 	for (; pos_i != pos_end; pos_i++) {
-		#ifdef USE_STD_MAP
 		Node * node = pos_i->second;
-		#else
-		Node * node = (*pos_i)->GetValue();
-		#endif
 		if (node) {
 			delete node;
 		}
 	}
-	#ifdef USE_STD_MAP
 	#else
-	delete[] 
+	unsigned int n_positions;
+	PosIterator * serialized = positions->Serialize(&n_positions);
+	PosIterator * pos_i = serialized;
+	PosIterator * pos_end = serialized + n_positions;
+	for (; pos_i != pos_end; pos_i++) {
+		Node * node = (*pos_i)->GetValue();
+		if (node) {
+			delete node;
+		}
+	}
+	delete[] serialized;
+	#endif
 }
 
 bool TableBase::AddStaticallySolved(BoardState state, uint8_t result) {
@@ -60,7 +60,7 @@ bool TableBase::AddStaticallySolved(BoardState state, uint8_t result) {
 	#else
 	PosIterator pos_i = positions->Find(state);
 	if (pos_i) {
-		Node * node = (*pos_i)->GetValue();
+		Node * node = pos_i->GetValue();
 	#endif
 		// If already exists, just modify
 		if (node) {
@@ -79,6 +79,7 @@ bool TableBase::AddStaticallySolved(BoardState state, uint8_t result) {
 		.distance = 0,
 		.next = NULL,
 		.move_to_next = Move(),
+		.move_cache = MoveList(),
 		.hash = 0
 	};
 	#ifdef USE_STD_MAP
@@ -113,6 +114,7 @@ bool TableBase::AddFrontier(BoardState state) {
 		.distance = 0,
 		.next = NULL,
 		.move_to_next = Move(),
+		.move_cache = MoveList(),
 		.hash = 0
 	};
 	#ifdef USE_STD_MAP
@@ -132,17 +134,20 @@ bool TableBase::AddLinkedSolved(BoardState state, uint8_t result, Node * next, B
 	if (pos_i == positions.end() || next_i == positions.end()) {
 		return false;
 	}
+	// Modify solved position
+	Node * node = pos_i->second;
+	Node * next_node = next_i->second;
 	#else
 	PosIterator pos_i = positions->Find(state);
 	PosIterator next_i = positions->Find(next_state);
 	if (!pos_i || !next_i) {
 		return false;
 	}
+	// Modify solved position
+	Node * node = pos_i->GetValue();
+	Node * next_node = next_i->GetValue();
 	#endif
 	
-	// Modify solved position
-	Node * node = pos_i->second;
-	Node * next_node = next_i->second;
 	if (!node || !next_node) {
 		return false;
 	}
@@ -202,12 +207,26 @@ void TableBase::Expand() {
 		// Generate frontier list
 		// NOTE: std::map iterators are not invalidated by insertion
 		std::vector<PosIterator> frontier;
-		PosIterator pos_i = positions.begin(), pos_end = positions.end();
+		#ifdef USE_STD_MAP
+		PosIterator pos_i = positions.begin();
+		PosIterator pos_end = positions.end();
 		for (; pos_i != pos_end; pos_i++) {
 			if (pos_i->second->status == Node::STATUS_FRONTIER) {
 				frontier.push_back(pos_i);
 			}
 		}
+		#else
+		unsigned int n_positions;
+		PosIterator * serialized = positions->Serialize(&n_positions);
+		PosIterator * pos_i = serialized;
+		PosIterator * pos_end = serialized + n_positions;
+		for (; pos_i != pos_end; pos_i++) {
+			if ((*pos_i)->GetValue()->status == Node::STATUS_FRONTIER) {
+				frontier.push_back(*pos_i);
+			}
+		}
+		delete[] serialized;
+		#endif
 		
 		// Exit if frontier is empty
 		if (frontier.size() == 0) break;
@@ -216,8 +235,13 @@ void TableBase::Expand() {
 		auto frontier_i = frontier.begin(), frontier_end = frontier.end();
 		for (; frontier_i != frontier_end; frontier_i++) {
 			
+			#ifdef USE_STD_MAP
 			BoardState state = (*frontier_i)->first;
 			Node * node = (*frontier_i)->second;
+			#else
+			BoardState state = (*frontier_i)->GetKey();
+			Node * node = (*frontier_i)->GetValue();
+			#endif
 			if (!node) continue;
 			
 			// Determine results needed for an outcome
@@ -259,12 +283,21 @@ void TableBase::Expand() {
 					if (board.InCheck(state.white_to_move)) goto unmake;
 					
 					// Find position in solved
+					#ifdef USE_STD_MAP
 					next_i = positions.find(board.GetCurrent());
 					if (next_i == positions.end()) {
 						any_undetermined = true;
 						goto unmake;
 					}
 					next_node = next_i->second;
+					#else
+					next_i = positions->Find(board.GetCurrent());
+					if (!next_i) {
+						any_undetermined = true;
+						goto unmake;
+					}
+					next_node = next_i->GetValue();
+					#endif
 					if (!next_node) goto unmake;
 					
 					// If the node is not solved or undetermined,
@@ -306,11 +339,19 @@ void TableBase::Expand() {
 			// Process if node was conclusively solved
 			// If there was a win, automatically solved
 			if (best_cond == cond_win) {
+				#ifdef USE_STD_MAP
 				AddLinkedSolved(state, cond_win, best_i->second, best_i->first, best_move);
+				#else
+				AddLinkedSolved(state, cond_win, best_i->GetValue(), best_i->GetKey(), best_move);
+				#endif
 			}
 			// If all nodes are determined, possible to solve otherwise
 			else if (!any_undetermined) {
+				#ifdef USE_STD_MAP
 				AddLinkedSolved(state, best_cond, best_i->second, best_i->first, best_move);
+				#else
+				AddLinkedSolved(state, best_cond, best_i->GetValue(), best_i->GetKey(), best_move);
+				#endif
 			}
 			// If there are undetermined nodes, there could still be an
 			// undiscovered win, so do nothing with it
@@ -334,12 +375,24 @@ void TableBase::Optimize() {
 	for (int pass = 0;; pass++) {
 		int n_not_optimal = 0;
 		
+		#ifdef USE_STD_MAP
 		PosIterator pos_i = positions.begin();
 		PosIterator pos_end = positions.end();
+		#else
+		unsigned int n_positions;
+		PosIterator * serialized = positions->Serialize(&n_positions);
+		PosIterator * pos_i = serialized;
+		PosIterator * pos_end = serialized + n_positions;
+		#endif
 		for (; pos_i != pos_end; pos_i++) {
 			
+			#ifdef USE_STD_MAP
 			BoardState state = pos_i->first;
 			Node * node = pos_i->second;
+			#else
+			BoardState state = (*pos_i)->GetKey();
+			Node * node = (*pos_i)->GetValue();
+			#endif
 			if (!node) {
 				n_not_optimal++;
 				continue;
@@ -379,12 +432,21 @@ void TableBase::Optimize() {
 					if (board.InCheck(state.white_to_move)) goto unmake;
 					
 					// Find position in solved
+					#ifdef USE_STD_MAP
 					next_i = positions.find(board.GetCurrent());
 					if (next_i == positions.end()) {
 						n_not_optimal++;
 						goto unmake;
 					}
 					next_node = next_i->second;
+					#else
+					next_i = positions->Find(board.GetCurrent());
+					if (!next_i) {
+						n_not_optimal++;
+						goto unmake;
+					}
+					next_node = next_i->GetValue();
+					#endif
 					if (!next_node) goto unmake;
 					
 					// Check that position has same result
@@ -419,6 +481,11 @@ void TableBase::Optimize() {
 			}
 		}
 		
+		#ifdef USE_STD_MAP
+		#else
+		delete[] serialized;
+		#endif
+		
 		std::cout << "Pass " << pass << ": " << n_not_optimal << " not optimal" << std::endl;
 		if (n_not_optimal == 0) break;
 	}
@@ -429,13 +496,22 @@ void TableBase::Optimize() {
 TableBase::Evaluation TableBase::Evaluate(BoardState state) {
 	Evaluation output;
 	
+	#ifdef USE_STD_MAP
 	PosIterator pos_i = positions.find(state);
 	if (pos_i == positions.end() || !pos_i->second) {
+	#else
+	PosIterator pos_i = positions->Find(state);
+	if (!pos_i || !pos_i->GetValue()) {
+	#endif
 		output.result = Evaluation::RESULT_UNDETERMINED;
 		return output;
 	}
 	else {
+		#ifdef USE_STD_MAP
 		Node * node = pos_i->second;
+		#else
+		Node * node = pos_i->GetValue();
+		#endif
 		output.result = node->result;
 		output.distance = node->distance;
 		output.white_to_move = state.white_to_move;
@@ -448,15 +524,30 @@ std::ostream & operator << (std::ostream & os, TableBase & tb) {
 	
 	// Count frontier/solved nodes
 	int n_frontier = 0, n_solved = 0;
+	#ifdef USE_STD_MAP
 	TableBase::PosIterator pos_i = tb.positions.begin();
 	TableBase::PosIterator pos_end = tb.positions.end();
+	#else
+	unsigned int n_positions;
+	TableBase::PosIterator * serialized = tb.positions->Serialize(&n_positions);
+	TableBase::PosIterator * pos_i = serialized;
+	TableBase::PosIterator * pos_end = serialized + n_positions;
+	#endif
 	for (; pos_i != pos_end; pos_i++) {
+		#ifdef USE_STD_MAP
 		TableBase::Node * node = pos_i->second;
+		#else
+		TableBase::Node * node = (*pos_i)->GetValue();
+		#endif
 		if (node) {
 			if (node->status == TableBase::Node::STATUS_FRONTIER) n_frontier++;
 			else if (node->status == TableBase::Node::STATUS_SOLVED) n_solved++;
 		}
 	}
+	#ifdef USE_STD_MAP
+	#else
+	delete[] serialized;
+	#endif
 	
 	os << "+-------------------------------------------------------------------------------" << std::endl;
 	os << "| TABLE BASE" << std::endl;
@@ -471,11 +562,26 @@ void TableBase::PrintStrata() {
 	int count[1024];
 	for (int i = 0; i < 1024; i++) count[i] = 0;
 	
+	#ifdef USE_STD_MAP
 	PosIterator pos_i = positions.begin();
 	PosIterator pos_end = positions.end();
+	#else
+	unsigned int n_positions;
+	PosIterator * serialized = positions->Serialize(&n_positions);
+	PosIterator * pos_i = serialized;
+	PosIterator * pos_end = serialized + n_positions;
+	#endif
 	for (; pos_i != pos_end; pos_i++) {
+		#ifdef USE_STD_MAP
 		count[pos_i->second->distance]++;
+		#else
+		count[(*pos_i)->GetValue()->distance]++;
+		#endif
 	}
+	#ifdef USE_STD_MAP
+	#else
+	delete[] serialized;
+	#endif
 	
 	for (int i = 0; i < 1024; i++) {
 		if (count[i] == 0) break;
